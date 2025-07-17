@@ -63,7 +63,11 @@ func (l *Lexer) NextToken() token.Token {
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
-			return tok
+			return tok // early return since l.readChar() is called already
+		} else if isDigit(l.ch) {
+			tok.Literal = l.readNumber()
+			tok.Type = token.INT
+			return tok // early return since l.readChar() is called already
 		} else {
 			// encountered unexpected token
 			tok = newToken(token.ILLEGAL, l.ch)
@@ -82,6 +86,16 @@ func (l *Lexer) readIdentifier() string {
 	return l.input[position:l.position]
 }
 
+// return slice of input that contains numerical digits
+// TODO: This only handles integers at the moment. Expand to floats and other notations (bin/octal/hex)?
+func (l *Lexer) readNumber() string {
+	position := l.position
+	for isDigit(l.ch) {
+		l.readChar()
+	}
+	return l.input[position:l.position]
+}
+
 func (l *Lexer) skipWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
 		l.readChar()
@@ -91,4 +105,8 @@ func (l *Lexer) skipWhitespace() {
 // helper function to check if ASCII character is a letter or an underscore
 func isLetter(ch byte) bool {
 	return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch == '_'
+}
+
+func isDigit(ch byte) bool {
+	return '0' <= ch && ch <= '9'
 }
