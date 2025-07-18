@@ -41,13 +41,28 @@ func (l *Lexer) NextToken() token.Token {
 
 	switch l.ch {
 	case '=':
-		tok = newToken(token.ASSIGN, l.ch)
+		// check for "==" token
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{Type: token.EQ, Literal: literal}
+		} else {
+			tok = newToken(token.ASSIGN, l.ch)
+		}
 	case '+':
 		tok = newToken(token.PLUS, l.ch)
 	case '-':
 		tok = newToken(token.MINUS, l.ch)
 	case '!':
-		tok = newToken(token.BANG, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			literal := string(ch) + string(l.ch)
+			tok = token.Token{Type: token.NOT_EQ, Literal: literal}
+		} else {
+			tok = newToken(token.BANG, l.ch)
+		}
 	case '/':
 		tok = newToken(token.SLASH, l.ch)
 	case '*':
@@ -89,7 +104,16 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
-// reads for an identifier from current position in lexer; returns when non-letter char is encountered
+// Look ahead for next immediate character, mainly for specialized tokens with two or more characters
+func (l *Lexer) peekChar() byte {
+	if l.readPosition >= len(l.input) {
+		return 0
+	} else {
+		return l.input[l.readPosition]
+	}
+}
+
+// Reads for an identifier from current position in lexer; returns when non-letter char is encountered
 func (l *Lexer) readIdentifier() string {
 	position := l.position
 	for isLetter(l.ch) {
@@ -98,7 +122,7 @@ func (l *Lexer) readIdentifier() string {
 	return l.input[position:l.position]
 }
 
-// return slice of input that contains numerical digits
+// Return slice of input that contains numerical digits
 // TODO: This only handles integers at the moment. Expand to floats and other notations (bin/octal/hex)?
 func (l *Lexer) readNumber() string {
 	position := l.position
@@ -114,7 +138,7 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
-// helper function to check if ASCII character is a letter or an underscore
+// Helper function to check if ASCII character is a letter or an underscore
 func isLetter(ch byte) bool {
 	return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch == '_'
 }
