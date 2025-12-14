@@ -16,7 +16,7 @@ jobs:
           go-version: "1.20"
 
       - name: Compile
-        run: go build ./src/monkey
+        run: cd src/monkey && go build
 
       - name: Lexer testing
         run: go test ./src/monkey/lexer
