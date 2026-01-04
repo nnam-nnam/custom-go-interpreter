@@ -30,3 +30,6 @@ jobs:
 
       - name: AST testing
         run: go test -v ./ast
+      
+      - name: Evaluator testing
+        run: go test -v ./evaluator
