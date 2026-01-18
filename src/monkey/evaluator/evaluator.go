@@ -37,9 +37,11 @@ func Eval(node ast.Node) object.Object {
 	// Expressions
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
-
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
+	case *ast.PrefixExpression:
+		right := Eval(node.Right)
+		return evalPrefixExpression(node.Operator, right)
 	}
 
 	return nil
@@ -53,4 +55,44 @@ func evalStatements(stmts []ast.Statement) object.Object {
 	}
 
 	return result
+}
+
+/*
+Function that routes to proper handling function for each supported prefix operator
+*/
+func evalPrefixExpression(operator string, right object.Object) object.Object {
+	switch operator {
+	case "!":
+		return evalBangOperatorExpression(right)
+	case "-":
+		return evalMinusPrefixOperatorExpression(right)
+	default:
+		return NULL // TODO: Implement proper error handling later?
+	}
+}
+
+/*
+Return the inverted truth value of `right`
+*/
+func evalBangOperatorExpression(right object.Object) object.Object {
+	switch right {
+	case TRUE:
+		return FALSE
+	case FALSE:
+		return TRUE
+	default:
+		return FALSE
+	}
+}
+
+/*
+Return the negative value of `right`
+*/
+func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
+	if right.Type() != object.INTEGER_OBJ {
+		return NULL
+	}
+
+	value := right.(*object.Integer).Value
+	return &object.Integer{Value: -value}
 }
