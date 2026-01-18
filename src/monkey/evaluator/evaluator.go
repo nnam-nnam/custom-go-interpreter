@@ -5,8 +5,12 @@ import (
 	"monkey/object"
 )
 
-// hardcode bool constants since it's only two value; no need to construct new struct pointers
+/*
+hardcode constants since it's only two values + null
+no need to construct new struct pointers
+*/
 var (
+	NULL  = &object.Null{}
 	TRUE  = &object.Boolean{Value: true}
 	FALSE = &object.Boolean{Value: false}
 )
