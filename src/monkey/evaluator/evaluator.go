@@ -5,6 +5,19 @@ import (
 	"monkey/object"
 )
 
+// hardcode bool constants since it's only two value; no need to construct new struct pointers
+var (
+	TRUE  = &object.Boolean{Value: true}
+	FALSE = &object.Boolean{Value: false}
+)
+
+func nativeBoolToBooleanObject(input bool) *object.Boolean {
+	if input {
+		return TRUE
+	}
+	return FALSE
+}
+
 /*
 Recursively traverse AST tree and evaluate given statement/expression
 */
@@ -22,7 +35,7 @@ func Eval(node ast.Node) object.Object {
 		return &object.Integer{Value: node.Value}
 
 	case *ast.Boolean:
-		return &object.Boolean{Value: node.Value}
+		return nativeBoolToBooleanObject(node.Value)
 	}
 
 	return nil
