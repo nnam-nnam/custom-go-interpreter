@@ -42,6 +42,10 @@ func Eval(node ast.Node) object.Object {
 	case *ast.PrefixExpression:
 		right := Eval(node.Right)
 		return evalPrefixExpression(node.Operator, right)
+	case *ast.InfixExpression:
+		left := Eval(node.Left)
+		right := Eval(node.Right)
+		return evalInfixExpression(node.Operator, left, right)
 	}
 
 	return nil
@@ -95,4 +99,62 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 
 	value := right.(*object.Integer).Value
 	return &object.Integer{Value: -value}
+}
+
+/*
+Function that routes to proper handling function for each supported infix operator
+*/
+func evalInfixExpression(
+	operator string,
+	left, right object.Object,
+) object.Object {
+	switch {
+	// int + int, int - int, etc.
+	// this check should go before the bool operands so that value comparison is done
+	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
+		return evalIntegerInfixExpression(operator, left, right)
+
+	// bool == bool, bool != bool
+	// we're doing point comparison here because bools point to either one of the two
+	case operator == "==":
+		return nativeBoolToBooleanObject(left == right)
+	case operator == "!=":
+		return nativeBoolToBooleanObject(left != right)
+
+	default:
+		return NULL
+	}
+}
+
+func evalIntegerInfixExpression(
+	operator string,
+	left, right object.Object,
+) object.Object {
+	leftVal := left.(*object.Integer).Value
+	rightVal := right.(*object.Integer).Value
+
+	switch operator {
+	// return Integer objects
+	case "+":
+		return &object.Integer{Value: leftVal + rightVal}
+	case "-":
+		return &object.Integer{Value: leftVal - rightVal}
+	case "*":
+		return &object.Integer{Value: leftVal * rightVal}
+	case "/":
+		return &object.Integer{Value: leftVal / rightVal}
+
+	// return Boolean objects
+	case "<":
+		return nativeBoolToBooleanObject(leftVal < rightVal)
+	case ">":
+		return nativeBoolToBooleanObject(leftVal > rightVal)
+	case "==":
+		return nativeBoolToBooleanObject(leftVal == rightVal)
+	case "!=":
+		return nativeBoolToBooleanObject(leftVal != rightVal)
+
+	default:
+		return NULL
+	}
 }
