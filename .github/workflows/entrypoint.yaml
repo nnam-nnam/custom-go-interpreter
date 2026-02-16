@@ -2,7 +2,8 @@ name: Build Monkey
 
 on:
   push:
-    branches: [main]
+    paths:
+      - '**.go'
 
 defaults:
   run:
