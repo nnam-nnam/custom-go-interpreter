@@ -3,7 +3,7 @@ name: Build Monkey
 on:
   push:
     paths:
-      - '**.go'
+      - "**.go"
 
 defaults:
   run:
@@ -32,6 +32,9 @@ jobs:
 
       - name: AST testing
         run: go test -v ./ast
-      
+
+      - name: Object testing
+        run: go test -v ./object
+
       - name: Evaluator testing
         run: go test -v ./evaluator
